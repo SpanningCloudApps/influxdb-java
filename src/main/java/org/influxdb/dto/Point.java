@@ -5,6 +5,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -266,6 +268,8 @@ public class Point {
 			if (value instanceof String) {
 				String stringValue = (String) value;
 				sb.append("\"").append(FIELD_ESCAPER.escape(stringValue)).append("\"");
+			} else if (isInfluxDBInteger(value)) {
+				sb.append(value).append("i");
 			} else if (value instanceof Number) {
 				sb.append(numberFormat.format(value));
 			} else {
@@ -286,6 +290,15 @@ public class Point {
 		}
 		sb.append(" ").append(TimeUnit.NANOSECONDS.convert(this.time, this.precision));
 		return sb;
+	}
+	
+	private static boolean isInfluxDBInteger(Object value) {
+		return value instanceof Long ||
+				value instanceof AtomicLong ||
+				value instanceof Integer ||
+				value instanceof AtomicInteger ||
+				value instanceof Byte ||
+				value instanceof Short;
 	}
 
 }
